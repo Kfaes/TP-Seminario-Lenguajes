@@ -5,8 +5,8 @@ from objects import Player, Bullet
 
 
 class Game:
-
-    def __init__(self, size_x, size_y, ticks_per_bullet=10):
+#genero el background y dodne comienza el jugador
+    def __init__(self, size_x, size_y, ticks_per_bullet=30):
         self.size_x = int(size_x)
         self.size_y = int(size_y)
         self.field = pygame.Rect(0, 0, size_x, size_y)
@@ -17,35 +17,46 @@ class Game:
         self.score = 0
         self.ticks_per_bullet = ticks_per_bullet
 
+
+#
     def tick(self):
         self.player.tick()
         for bullet in self.bullets:
             bullet.tick()
-
+#defino el hitbox 
         bullet_hitboxes = [b.hitbox() for b in self.bullets]
 
+#defino las balas a aparecer 
         self.bullets = [self.bullets[i] for i
                         in self.field.collidelistall(bullet_hitboxes)]
-
+#checkea status del jugador y de ser necesario realiza explosion final
         if (self.player.alive and
                 self.player.hitbox().collidelist(bullet_hitboxes) != -1):
             self.player.alive = False
             self.bullets += Game.death_explosion(self.player.x, self.player.y)
-
+#defino puntuacion
         if self.player.alive:
             self.score += 1
 
         if self.player.alive and not random.randrange(self.ticks_per_bullet):
             self.bullets.append(self.random_bullet())
 
+
+#dibujo 
     def draw(self, surface):
+        
+        #dibuja player
         self.player.draw(surface)
+        #dibuja bullets
         for bullet in self.bullets:
             bullet.draw(surface)
+        #dibuja puntuacion
         self.draw_score(surface)
+        #dibuja mensaje de nuevo juego
         if not self.player.alive:
             self.draw_newgame_message(surface)
 
+#define las balas y las velocidades de las mismas
     def random_bullet(self):
         max_speed = 3
         speed_x, speed_y = 0, 0
